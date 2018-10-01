@@ -23,7 +23,7 @@ View(gapminder)
 glimpse(gapminder)
 ```
 
-At first I tried this - but this is not helpful at all as you would have to scroll through all the rows to try to find the max and min by hand. 
+At first I tried this - but this is not helpful at all as you would have to scroll through all the rows to try to find the max and min manually. 
 
 ```{r}
 gapminder %>%
@@ -89,7 +89,8 @@ gapminder_2007 <- gapminder %>%
 
 ggplot(gapminder_2007, aes(x = year, y = gdpPercap, color = continent)) +
   geom_point() + facet_wrap(~continent) + 
-  scale_x_log10()
+  scale_x_log10() +
+  ggtitle("Comparing spread of GDP per capita across continents")
 ```
 
 I tried looking at spread in 2007 using boxplots which is useful for showing more specific information (IQR, range) about the the spread of gdpPercap between each continent.
@@ -99,7 +100,8 @@ gapminder_2007 <- gapminder %>%
   filter(year == 2007)
 ggplot(gapminder_2007, aes(x = continent, y = gdpPercap)) +
   geom_boxplot() +
-   scale_y_log10()
+   scale_y_log10() +
+    ggtitle("Comparing GDP per capita across continents using boxplots")
 
 
 ```
@@ -108,21 +110,25 @@ ggplot(gapminder_2007, aes(x = continent, y = gdpPercap)) +
 #Task 3
 How is life expectancy changing over time on different continents?
 
-Need to figure out how to lifeExp from 2007 minus lifeExp from 1952 using mutate
+Need to figure out how to find the difference in lifeExp between the latest data point (2007) and first data point (1952). After trying several u
+
+After trying several unsuccessful ways of creating a new variable that looks at change in lifeExp, I looked at the participation repo for cm_08.
 
 ```{r}
 gapminder %>% 
-  mutate(lifeExp)
+    group_by(continent, country) %>% 
+    transmute(lifeExp_change = lifeExp - first(lifeExp))
 ```
 
 
 
 ```{r}
 ggplot(gapminder, aes(x = year, y = lifeExp, color = continent)) +
-  geom_point() 
+  geom_point() +
+  ggtitle("Change in Life Expectancy over 55 years by Continent")
 ```
 
-I found the above graph too busy and difficult to understand/visualize the continental data. I triedg another way of looking at it. I adapted the code from: https://www.mrozinski.com.pl/posts/introduction-to-tidyverse/
+I found the above graph too busy and difficult to understand/visualize the continental data. I tried another way of looking at it. I adapted the code from: https://www.mrozinski.com.pl/posts/introduction-to-tidyverse/
 
 
 
@@ -134,6 +140,7 @@ by_year_continent <- gapminder %>%
 
 ggplot(by_year_continent, aes(x=year, y=mdn_lifeExp, color=continent)) + 
       geom_point() + 
-      expand_limits(y=0)
+      expand_limits(y=0) +
+ ggtitle("Change in Life Expectancy over 55 years by Continent")
 ```
 

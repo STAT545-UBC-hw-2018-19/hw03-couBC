@@ -56,7 +56,7 @@ glimpse(gapminder)
 ## $ gdpPercap <dbl> 779.4453, 820.8530, 853.1007, 836.1971, 739.9811, 78...
 ```
 
-At first I tried this - but this is not helpful at all as you would have to scroll through all the rows to try to find the max and min by hand. 
+At first I tried this - but this is not helpful at all as you would have to scroll through all the rows to try to find the max and min manually. 
 
 
 ```r
@@ -183,30 +183,83 @@ gapminder %>%
 ## # ... with 132 more rows
 ```
 
-This is not the most beautiful graph, re-think this one.
+These are my different attempts at visualising the spread of gdp Per capita across the continents in the year 2007. It looks like Asia has the most spread of gdpPercap while Oceania has the least.
+
 
 
 ```r
-ggplot(gapminder_2007, aes(x = continent, y = gdpPercap)) +
-  geom_point() + facet_wrap(~continent) 
+gapminder_2007 <- gapminder %>%
+  filter(year == 2007)
+
+ggplot(gapminder_2007, aes(x = year, y = gdpPercap, color = continent)) +
+  geom_point() + facet_wrap(~continent) + 
+  scale_x_log10() +
+  ggtitle("Comparing spread of GDP per capita across continents")
 ```
 
 ![](Hw03_couBC_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
+I tried looking at spread in 2007 using boxplots which is useful for showing more specific information (IQR, range) about the the spread of gdpPercap between each continent.
+
+
+```r
+gapminder_2007 <- gapminder %>%
+  filter(year == 2007)
+ggplot(gapminder_2007, aes(x = continent, y = gdpPercap)) +
+  geom_boxplot() +
+   scale_y_log10() +
+    ggtitle("Comparing GDP per capita across continents using boxplots")
+```
+
+![](Hw03_couBC_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
 
             
 #Task 3
 How is life expectancy changing over time on different continents?
 
+Need to figure out how to find the difference in lifeExp between the latest data point (2007) and first data point (1952). After trying several u
+
+After trying several unsuccessful ways of creating a new variable that looks at change in lifeExp, I looked at the participation repo for cm_08.
+
+
+```r
+gapminder %>% 
+    group_by(continent, country) %>% 
+    transmute(lifeExp_change = lifeExp - first(lifeExp))
+```
+
+```
+## # A tibble: 1,704 x 3
+## # Groups:   continent, country [142]
+##    continent country     lifeExp_change
+##    <fct>     <fct>                <dbl>
+##  1 Asia      Afghanistan           0   
+##  2 Asia      Afghanistan           1.53
+##  3 Asia      Afghanistan           3.20
+##  4 Asia      Afghanistan           5.22
+##  5 Asia      Afghanistan           7.29
+##  6 Asia      Afghanistan           9.64
+##  7 Asia      Afghanistan          11.1 
+##  8 Asia      Afghanistan          12.0 
+##  9 Asia      Afghanistan          12.9 
+## 10 Asia      Afghanistan          13.0 
+## # ... with 1,694 more rows
+```
+
+
 
 
 ```r
 ggplot(gapminder, aes(x = year, y = lifeExp, color = continent)) +
-  geom_point() 
+  geom_point() +
+  ggtitle("Change in Life Expectancy over 55 years by Continent")
 ```
 
-![](Hw03_couBC_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+![](Hw03_couBC_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
 
-I found the above graph too busy. Trying another way of looking at it. I adapted the code from: (https://www.mrozinski.com.pl/posts/introduction-to-tidyverse/)
+I found the above graph too busy and difficult to understand/visualize the continental data. I tried another way of looking at it. I adapted the code from: https://www.mrozinski.com.pl/posts/introduction-to-tidyverse/
+
+
 
 
 
@@ -217,8 +270,9 @@ by_year_continent <- gapminder %>%
 
 ggplot(by_year_continent, aes(x=year, y=mdn_lifeExp, color=continent)) + 
       geom_point() + 
-      expand_limits(y=0)
+      expand_limits(y=0) +
+ ggtitle("Change in Life Expectancy over 55 years by Continent")
 ```
 
-![](Hw03_couBC_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
+![](Hw03_couBC_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
 

@@ -2,9 +2,7 @@
 title: "Hw03_couBC"
 author: "CouBC"
 date: '2018-10-01'
-output: 
-  html_document: 
-    keep_md: yes
+output: github_document
 ---
 #Assignment 3:
 Loading tidyverse and gapminder.
@@ -12,14 +10,12 @@ Loading tidyverse and gapminder.
 ```{r}
 library(gapminder)
 library(tidyverse)
-library(dplyr)
 ```
 
 #Task 1:
 Get the maximum and minimum of GDP per capita for all continents
 
 ```{r}
-View(gapminder)
 glimpse(gapminder)
 ```
 
@@ -27,17 +23,24 @@ At first I tried this - but this is not helpful at all as you would have to scro
 
 ```{r}
 gapminder %>%
-  group_by(continent) %>%
   arrange(gdpPercap)
   
 ```
 
-I tried a couple of different combinations with max(gdpPercap) and min(gdpPercap) and pmax(x) and p(min) but I couldn't get it to work telling me there were errors in my argument. I looked at Jenny's tutorial on one-table verbs (http://stat545.com/block010_dplyr-end-single-table.html) which looked at max and min life expectancie:   summarize(min_lifeExp = min(lifeExp), max_lifeExp = max(lifeExp)) and tried that for gdpPercap. Voila:
+I tried a couple of different combinations with max(gdpPercap) and min(gdpPercap) and pmax(x) and pmin(x) but I couldn't get it to work telling me there were errors in my argument. I looked at Jenny's tutorial on one-table verbs (http://stat545.com/block010_dplyr-end-single-table.html) which looked at max and min life expectancie:   summarize(min_lifeExp = min(lifeExp), max_lifeExp = max(lifeExp)) and tried that for gdpPercap. Voila:
+
 
 ```{r}
 gapminder %>%
   group_by(continent) %>% 
   summarise(max_gdpPercap = max(gdpPercap), min_gdpPercap = min(gdpPercap))
+```
+
+
+```{r}
+gapminder %>%
+  group_by(continent) %>% 
+  summarize(max(gdpPercap), min(gdpPercap))
 ```
 
 Because it may be more meaningful to know max and min gdpPercap for a particular year, in the next section, I filtered to 2007:
@@ -76,8 +79,11 @@ Look at spread of GDP per capita within the continents.
 gapminder %>% 
   group_by(continent) %>% 
   filter(year == 2007) %>% 
-  select(country, gdpPercap)
+  select(country, gdpPercap) %>% 
+  summarize(sd_gdpPercap = sd(gdpPercap))
 ```
+
+
 
 These are my different attempts at visualising the spread of gdp Per capita across the continents in the year 2007. It looks like Asia has the most spread of gdpPercap while Oceania has the least.
 
@@ -85,11 +91,12 @@ These are my different attempts at visualising the spread of gdp Per capita acro
 ```{r}
 
 gapminder_2007 <- gapminder %>%
-  filter(year == 2007)
+  filter(year == 2007, continent != "Oceania")
 
 ggplot(gapminder_2007, aes(x = year, y = gdpPercap, color = continent)) +
-  geom_point() + facet_wrap(~continent) + 
-  scale_x_log10() +
+  geom_violin() + facet_wrap(~continent) + 
+  geom_jitter(alpha =.2) +
+  scale_y_log10() +
   ggtitle("Comparing spread of GDP per capita across continents")
 ```
 
@@ -110,22 +117,34 @@ ggplot(gapminder_2007, aes(x = continent, y = gdpPercap)) +
 #Task 3
 How is life expectancy changing over time on different continents?
 
-Need to figure out how to find the difference in lifeExp between the latest data point (2007) and first data point (1952). After trying several u
+Need to figure out how to find the difference in lifeExp between the latest data point (2007) and first data point (1952). 
 
 After trying several unsuccessful ways of creating a new variable that looks at change in lifeExp, I looked at the participation repo for cm_08.
 
 ```{r}
 gapminder %>% 
-    group_by(continent, country) %>% 
-    transmute(lifeExp_change = lifeExp - first(lifeExp))
+    group_by(continent) %>% 
+    transmute(lifeExp_change = lifeExp - lag(lifeExp)) %>% 
+    summarize(median_change = median(lifeExp_change, na.rm = T)) %>%
+  knitr::kable()
+
 ```
 
+```{r}
+gapminder %>% 
+    group_by(continent, country) %>% 
+    mutate(lifeExp_change = lifeExp - lag(lifeExp)) %>% 
+    ggplot(aes(year, lifeExp_change)) +
+    geom_point() + facet_wrap(~continent, scales = "free_y")
+  
+```
 
 
 ```{r}
 ggplot(gapminder, aes(x = year, y = lifeExp, color = continent)) +
   geom_point() +
-  ggtitle("Change in Life Expectancy over 55 years by Continent")
+  facet_grid(~continent) +
+  ggtitle("Change in Life Expectancy over 55 years by Continent") 
 ```
 
 I found the above graph too busy and difficult to understand/visualize the continental data. I tried another way of looking at it. I adapted the code from: https://www.mrozinski.com.pl/posts/introduction-to-tidyverse/

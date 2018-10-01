@@ -8,6 +8,6 @@ hw03-couBC created by GitHub Classroom
 [This is the link to the figures](https://github.com/STAT545-UBC-students/hw03-couBC/tree/master/Hw03_couBC_files/figure-markdown_github)
 
 
-## Some comic relief for all of you who get to this readme:
+Some comic relief for those of you who get to this readme:
 ![](http://phdcomics.com/comics/archive/phd030706s.gif)
 

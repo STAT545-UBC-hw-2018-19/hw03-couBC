@@ -6,11 +6,75 @@ output:
   html_document: 
     keep_md: yes
 ---
-Assignment 3:
+#Assignment 3:
 Loading tidyverse and gapminder.
 
 ```{r}
 library(gapminder)
 library(tidyverse)
+library(dplyr)
 ```
+
+#Attempt on the first task:
+Get the maximum and minimum of GDP per capita for all continents
+
+```{r}
+View(gapminder)
+glimpse(gapminder)
+```
+
+At first I tried this - but this is not helpful at all as you would have to scroll through all the rows to try to find the max and min by hand. 
+
+```{r}
+gapminder %>%
+  group_by(continent) %>%
+  arrange(gdpPercap)
+  
+```
+
+I tried a couple of different combinations with max(gdpPercap) and min(gdpPercap) and pmax(x) and p(min) but I couldn't get it to work telling me there were errors in my argument. I looked at Jenny's tutorial on one-table verbs (http://stat545.com/block010_dplyr-end-single-table.html) which looked at max and min life expectancie:   summarize(min_lifeExp = min(lifeExp), max_lifeExp = max(lifeExp)) and tried that for gdpPercap. Voila:
+
+```{r}
+gapminder %>%
+  group_by(continent) %>% 
+  summarise(max_gdpPercap = max(gdpPercap), min_gdpPercap = min(gdpPercap))
+```
+
+Because it may be more meaningful to know max and min gdpPercap for a particular year, in the next section, I filtered to 2007:
+
+```{r}
+gapminder %>%
+  group_by(continent) %>% 
+  filter(year == 2007) %>% 
+  summarise(max_gdpPercap = max(gdpPercap), min_gdpPercap = min(gdpPercap))
+```
+
+In order to visualize this in a graph:
+
+```{r}
+ggplot(gapminder, aes(x=continent, y=gdpPercap)) +geom_boxplot() + scale_y_log10() + ggtitle("Comparing GDP per capita across continents")
+```
+
+Only looking at year 2007 data for gdp Per capita across continents:
+
+```{r}
+gapminder_2007 <- gapminder %>%
+  filter(year == 2007)
+
+ggplot(gapminder_2007, aes(x = continent, y = gdpPercap)) +
+  geom_boxplot() +
+  scale_y_log10() + ggtitle("Comparing GDP per capita across continents")
+```
+
+            
+            
+            
+
+#Task 2
+Look at spread of GDP per capita within the continents.
+
+            
+#Task 3
+How is life expectancy changing over time on different continents?
+
 

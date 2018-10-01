@@ -15,7 +15,7 @@ library(tidyverse)
 library(dplyr)
 ```
 
-#Attempt on the first task:
+#Task 1:
 Get the maximum and minimum of GDP per capita for all continents
 
 ```{r}
@@ -67,14 +67,73 @@ ggplot(gapminder_2007, aes(x = continent, y = gdpPercap)) +
 ```
 
             
-            
-            
 
 #Task 2
 Look at spread of GDP per capita within the continents.
+
+
+```{r}
+gapminder %>% 
+  group_by(continent) %>% 
+  filter(year == 2007) %>% 
+  select(country, gdpPercap)
+```
+
+These are my different attempts at visualising the spread of gdp Per capita across the continents in the year 2007. It looks like Asia has the most spread of gdpPercap while Oceania has the least.
+
+
+```{r}
+
+gapminder_2007 <- gapminder %>%
+  filter(year == 2007)
+
+ggplot(gapminder_2007, aes(x = year, y = gdpPercap, color = continent)) +
+  geom_point() + facet_wrap(~continent) + 
+  scale_x_log10()
+```
+
+I tried looking at spread in 2007 using boxplots which is useful for showing more specific information (IQR, range) about the the spread of gdpPercap between each continent.
+
+```{r}
+gapminder_2007 <- gapminder %>%
+  filter(year == 2007)
+ggplot(gapminder_2007, aes(x = continent, y = gdpPercap)) +
+  geom_boxplot() +
+   scale_y_log10()
+
+
+```
 
             
 #Task 3
 How is life expectancy changing over time on different continents?
 
+Need to figure out how to lifeExp from 2007 minus lifeExp from 1952 using mutate
+
+```{r}
+gapminder %>% 
+  mutate(lifeExp)
+```
+
+
+
+```{r}
+ggplot(gapminder, aes(x = year, y = lifeExp, color = continent)) +
+  geom_point() 
+```
+
+I found the above graph too busy and difficult to understand/visualize the continental data. I triedg another way of looking at it. I adapted the code from: https://www.mrozinski.com.pl/posts/introduction-to-tidyverse/
+
+
+
+
+```{r}
+by_year_continent <- gapminder %>%
+      group_by(continent, year) %>% 
+      summarize(mdn_lifeExp = median(lifeExp))
+
+ggplot(by_year_continent, aes(x=year, y=mdn_lifeExp, color=continent)) + 
+      geom_point() + 
+      expand_limits(y=0)
+```
 

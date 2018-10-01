@@ -32,3 +32,193 @@ library(tidyverse)
 ## ✖ dplyr::lag()    masks stats::lag()
 ```
 
+```r
+library(dplyr)
+```
+
+#Task 1:
+Get the maximum and minimum of GDP per capita for all continents
+
+
+```r
+View(gapminder)
+glimpse(gapminder)
+```
+
+```
+## Observations: 1,704
+## Variables: 6
+## $ country   <fct> Afghanistan, Afghanistan, Afghanistan, Afghanistan, ...
+## $ continent <fct> Asia, Asia, Asia, Asia, Asia, Asia, Asia, Asia, Asia...
+## $ year      <int> 1952, 1957, 1962, 1967, 1972, 1977, 1982, 1987, 1992...
+## $ lifeExp   <dbl> 28.801, 30.332, 31.997, 34.020, 36.088, 38.438, 39.8...
+## $ pop       <int> 8425333, 9240934, 10267083, 11537966, 13079460, 1488...
+## $ gdpPercap <dbl> 779.4453, 820.8530, 853.1007, 836.1971, 739.9811, 78...
+```
+
+At first I tried this - but this is not helpful at all as you would have to scroll through all the rows to try to find the max and min by hand. 
+
+
+```r
+gapminder %>%
+  group_by(continent) %>%
+  arrange(gdpPercap)
+```
+
+```
+## # A tibble: 1,704 x 6
+## # Groups:   continent [5]
+##    country          continent  year lifeExp      pop gdpPercap
+##    <fct>            <fct>     <int>   <dbl>    <int>     <dbl>
+##  1 Congo, Dem. Rep. Africa     2002    45.0 55379852      241.
+##  2 Congo, Dem. Rep. Africa     2007    46.5 64606759      278.
+##  3 Lesotho          Africa     1952    42.1   748747      299.
+##  4 Guinea-Bissau    Africa     1952    32.5   580653      300.
+##  5 Congo, Dem. Rep. Africa     1997    42.6 47798986      312.
+##  6 Eritrea          Africa     1952    35.9  1438760      329.
+##  7 Myanmar          Asia       1952    36.3 20092996      331 
+##  8 Lesotho          Africa     1957    45.0   813338      336.
+##  9 Burundi          Africa     1952    39.0  2445618      339.
+## 10 Eritrea          Africa     1957    38.0  1542611      344.
+## # ... with 1,694 more rows
+```
+
+I tried a couple of different combinations with max(gdpPercap) and min(gdpPercap) and pmax(x) and p(min) but I couldn't get it to work telling me there were errors in my argument. I looked at Jenny's tutorial on one-table verbs (http://stat545.com/block010_dplyr-end-single-table.html) which looked at max and min life expectancie:   summarize(min_lifeExp = min(lifeExp), max_lifeExp = max(lifeExp)) and tried that for gdpPercap. Voila:
+
+
+```r
+gapminder %>%
+  group_by(continent) %>% 
+  summarise(max_gdpPercap = max(gdpPercap), min_gdpPercap = min(gdpPercap))
+```
+
+```
+## # A tibble: 5 x 3
+##   continent max_gdpPercap min_gdpPercap
+##   <fct>             <dbl>         <dbl>
+## 1 Africa           21951.          241.
+## 2 Americas         42952.         1202.
+## 3 Asia            113523.          331 
+## 4 Europe           49357.          974.
+## 5 Oceania          34435.        10040.
+```
+
+Because it may be more meaningful to know max and min gdpPercap for a particular year, in the next section, I filtered to 2007:
+
+
+```r
+gapminder %>%
+  group_by(continent) %>% 
+  filter(year == 2007) %>% 
+  summarise(max_gdpPercap = max(gdpPercap), min_gdpPercap = min(gdpPercap))
+```
+
+```
+## # A tibble: 5 x 3
+##   continent max_gdpPercap min_gdpPercap
+##   <fct>             <dbl>         <dbl>
+## 1 Africa           13206.          278.
+## 2 Americas         42952.         1202.
+## 3 Asia             47307.          944 
+## 4 Europe           49357.         5937.
+## 5 Oceania          34435.        25185.
+```
+
+In order to visualize this in a graph:
+
+
+```r
+ggplot(gapminder, aes(x=continent, y=gdpPercap)) +geom_boxplot() + scale_y_log10() + ggtitle("Comparing GDP per capita across continents")
+```
+
+![](Hw03_couBC_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+
+Only looking at year 2007 data for gdp Per capita across continents:
+
+
+```r
+gapminder_2007 <- gapminder %>%
+  filter(year == 2007)
+
+ggplot(gapminder_2007, aes(x = continent, y = gdpPercap)) +
+  geom_boxplot() +
+  scale_y_log10() + ggtitle("Comparing GDP per capita across continents")
+```
+
+![](Hw03_couBC_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+
+            
+
+#Task 2
+Look at spread of GDP per capita within the continents.
+
+
+
+```r
+gapminder %>% 
+  group_by(continent) %>% 
+  filter(year == 2007) %>% 
+  select(country, gdpPercap)
+```
+
+```
+## Adding missing grouping variables: `continent`
+```
+
+```
+## # A tibble: 142 x 3
+## # Groups:   continent [5]
+##    continent country     gdpPercap
+##    <fct>     <fct>           <dbl>
+##  1 Asia      Afghanistan      975.
+##  2 Europe    Albania         5937.
+##  3 Africa    Algeria         6223.
+##  4 Africa    Angola          4797.
+##  5 Americas  Argentina      12779.
+##  6 Oceania   Australia      34435.
+##  7 Europe    Austria        36126.
+##  8 Asia      Bahrain        29796.
+##  9 Asia      Bangladesh      1391.
+## 10 Europe    Belgium        33693.
+## # ... with 132 more rows
+```
+
+This is not the most beautiful graph, re-think this one.
+
+
+```r
+ggplot(gapminder_2007, aes(x = continent, y = gdpPercap)) +
+  geom_point() + facet_wrap(~continent) 
+```
+
+![](Hw03_couBC_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
+            
+#Task 3
+How is life expectancy changing over time on different continents?
+
+
+
+```r
+ggplot(gapminder, aes(x = year, y = lifeExp, color = continent)) +
+  geom_point() 
+```
+
+![](Hw03_couBC_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+
+I found the above graph too busy. Trying another way of looking at it. I adapted the code from: (https://www.mrozinski.com.pl/posts/introduction-to-tidyverse/)
+
+
+
+```r
+by_year_continent <- gapminder %>%
+      group_by(continent, year) %>% 
+      summarize(mdn_lifeExp = median(lifeExp))
+
+ggplot(by_year_continent, aes(x=year, y=mdn_lifeExp, color=continent)) + 
+      geom_point() + 
+      expand_limits(y=0)
+```
+
+![](Hw03_couBC_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
+

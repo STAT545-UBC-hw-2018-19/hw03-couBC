@@ -30,7 +30,7 @@ Task 1:
 Get the maximum and minimum of GDP per capita for all continents
 
 ``` r
-glimpse(gapminder)
+glimpse(gapminder) 
 ```
 
     ## Observations: 1,704
@@ -69,17 +69,17 @@ I tried a couple of different combinations with max(gdpPercap) and min(gdpPercap
 ``` r
 gapminder %>%
   group_by(continent) %>% 
-  summarise(max_gdpPercap = max(gdpPercap), min_gdpPercap = min(gdpPercap))
+  summarise(max_gdpPercap = max(gdpPercap), min_gdpPercap = min(gdpPercap)) %>% 
+knitr::kable()
 ```
 
-    ## # A tibble: 5 x 3
-    ##   continent max_gdpPercap min_gdpPercap
-    ##   <fct>             <dbl>         <dbl>
-    ## 1 Africa           21951.          241.
-    ## 2 Americas         42952.         1202.
-    ## 3 Asia            113523.          331 
-    ## 4 Europe           49357.          974.
-    ## 5 Oceania          34435.        10040.
+| continent |  max\_gdpPercap|  min\_gdpPercap|
+|:----------|---------------:|---------------:|
+| Africa    |        21951.21|        241.1659|
+| Americas  |        42951.65|       1201.6372|
+| Asia      |       113523.13|        331.0000|
+| Europe    |        49357.19|        973.5332|
+| Oceania   |        34435.37|      10039.5956|
 
 ``` r
 gapminder %>%
@@ -102,17 +102,17 @@ Because it may be more meaningful to know max and min gdpPercap for a particular
 gapminder %>%
   group_by(continent) %>% 
   filter(year == 2007) %>% 
-  summarise(max_gdpPercap = max(gdpPercap), min_gdpPercap = min(gdpPercap))
+  summarise(max_gdpPercap = max(gdpPercap), min_gdpPercap = min(gdpPercap)) %>% 
+knitr::kable()
 ```
 
-    ## # A tibble: 5 x 3
-    ##   continent max_gdpPercap min_gdpPercap
-    ##   <fct>             <dbl>         <dbl>
-    ## 1 Africa           13206.          278.
-    ## 2 Americas         42952.         1202.
-    ## 3 Asia             47307.          944 
-    ## 4 Europe           49357.         5937.
-    ## 5 Oceania          34435.        25185.
+| continent |  max\_gdpPercap|  min\_gdpPercap|
+|:----------|---------------:|---------------:|
+| Africa    |        13206.48|        277.5519|
+| Americas  |        42951.65|       1201.6372|
+| Asia      |        47306.99|        944.0000|
+| Europe    |        49357.19|       5937.0295|
+| Oceania   |        34435.37|      25185.0091|
 
 In order to visualize this in a graph:
 
@@ -145,21 +145,38 @@ gapminder %>%
   group_by(continent) %>% 
   filter(year == 2007) %>% 
   select(country, gdpPercap) %>% 
-  summarize(sd_gdpPercap = sd(gdpPercap))
+  summarize(sd_gdpPercap = sd(gdpPercap)) %>% 
+knitr::kable()
 ```
 
     ## Adding missing grouping variables: `continent`
 
-    ## # A tibble: 5 x 2
-    ##   continent sd_gdpPercap
-    ##   <fct>            <dbl>
-    ## 1 Africa           3618.
-    ## 2 Americas         9713.
-    ## 3 Asia            14155.
-    ## 4 Europe          11800.
-    ## 5 Oceania          6541.
+| continent |  sd\_gdpPercap|
+|:----------|--------------:|
+| Africa    |       3618.163|
+| Americas  |       9713.209|
+| Asia      |      14154.937|
+| Europe    |      11800.340|
+| Oceania   |       6540.991|
 
-These are my different attempts at visualising the spread of gdp Per capita across the continents in the year 2007. It looks like Asia has the most spread of gdpPercap while Oceania has the least.
+These are my different attempts at visualising the spread of gdp Per capita across the continents in the year 2007.
+
+I tried looking at spread in 2007 using boxplots which is redundant useful for showing more specific information (IQR, range) about the the spread of gdpPercap between each continent.
+
+``` r
+gapminder_2007 <- gapminder %>%
+  filter(year == 2007)
+ggplot(gapminder_2007, aes(x = continent, y = gdpPercap)) +
+  geom_boxplot() +
+   scale_y_log10() +
+    ggtitle("Comparing GDP per capita across continents using boxplots")
+```
+
+![](Hw03_couBC_files/figure-markdown_github/unnamed-chunk-10-1.png)
+
+In order to try some of the fancier plots we learned in class I opted to make a violin plus jittler plot. This is more informative than the boxplot because it shows more of the distribution and contains the country data points.
+
+I eliminated Oceania as a continent as it had an empty graph (no violin) with 2 datapoints. It looks like Asia has a wide spread of gdpPercap and Europe has a small spread.wh
 
 ``` r
 gapminder_2007 <- gapminder %>%
@@ -170,19 +187,6 @@ ggplot(gapminder_2007, aes(x = year, y = gdpPercap, color = continent)) +
   geom_jitter(alpha =.2) +
   scale_y_log10() +
   ggtitle("Comparing spread of GDP per capita across continents")
-```
-
-![](Hw03_couBC_files/figure-markdown_github/unnamed-chunk-10-1.png)
-
-I tried looking at spread in 2007 using boxplots which is useful for showing more specific information (IQR, range) about the the spread of gdpPercap between each continent.
-
-``` r
-gapminder_2007 <- gapminder %>%
-  filter(year == 2007)
-ggplot(gapminder_2007, aes(x = continent, y = gdpPercap)) +
-  geom_boxplot() +
-   scale_y_log10() +
-    ggtitle("Comparing GDP per capita across continents using boxplots")
 ```
 
 ![](Hw03_couBC_files/figure-markdown_github/unnamed-chunk-11-1.png)
@@ -212,6 +216,8 @@ gapminder %>%
 | Europe    |           1.030|
 | Oceania   |           1.094|
 
+To graph this
+
 ``` r
 gapminder %>% 
     group_by(continent, country) %>% 
@@ -233,7 +239,7 @@ ggplot(gapminder, aes(x = year, y = lifeExp, color = continent)) +
 
 ![](Hw03_couBC_files/figure-markdown_github/unnamed-chunk-14-1.png)
 
-I found the above graph too busy and difficult to understand/visualize the continental data. I tried another way of looking at it. I adapted the code from: <https://www.mrozinski.com.pl/posts/introduction-to-tidyverse/>
+I tried another way of looking at it using the median of each continent. The resulting graph is less busy than the one above. I adapted the code from: <https://www.mrozinski.com.pl/posts/introduction-to-tidyverse/>
 
 ``` r
 by_year_continent <- gapminder %>%

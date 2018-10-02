@@ -16,7 +16,8 @@ library(tidyverse)
 Get the maximum and minimum of GDP per capita for all continents
 
 ```{r}
-glimpse(gapminder)
+glimpse(gapminder) 
+ 
 ```
 
 At first I tried this - but this is not helpful at all as you would have to scroll through all the rows to try to find the max and min manually. 
@@ -33,7 +34,8 @@ I tried a couple of different combinations with max(gdpPercap) and min(gdpPercap
 ```{r}
 gapminder %>%
   group_by(continent) %>% 
-  summarise(max_gdpPercap = max(gdpPercap), min_gdpPercap = min(gdpPercap))
+  summarise(max_gdpPercap = max(gdpPercap), min_gdpPercap = min(gdpPercap)) %>% 
+knitr::kable()
 ```
 
 
@@ -49,7 +51,8 @@ Because it may be more meaningful to know max and min gdpPercap for a particular
 gapminder %>%
   group_by(continent) %>% 
   filter(year == 2007) %>% 
-  summarise(max_gdpPercap = max(gdpPercap), min_gdpPercap = min(gdpPercap))
+  summarise(max_gdpPercap = max(gdpPercap), min_gdpPercap = min(gdpPercap)) %>% 
+knitr::kable()
 ```
 
 In order to visualize this in a graph:
@@ -80,13 +83,33 @@ gapminder %>%
   group_by(continent) %>% 
   filter(year == 2007) %>% 
   select(country, gdpPercap) %>% 
-  summarize(sd_gdpPercap = sd(gdpPercap))
+  summarize(sd_gdpPercap = sd(gdpPercap)) %>% 
+knitr::kable()
 ```
 
 
 
-These are my different attempts at visualising the spread of gdp Per capita across the continents in the year 2007. It looks like Asia has the most spread of gdpPercap while Oceania has the least.
+These are my different attempts at visualising the spread of gdp Per capita across the continents in the year 2007.
 
+
+
+I tried looking at spread in 2007 using boxplots which is redundant useful for showing more specific information (IQR, range) about the the spread of gdpPercap between each continent.
+
+
+```{r}
+gapminder_2007 <- gapminder %>%
+  filter(year == 2007)
+ggplot(gapminder_2007, aes(x = continent, y = gdpPercap)) +
+  geom_boxplot() +
+   scale_y_log10() +
+    ggtitle("Comparing GDP per capita across continents using boxplots")
+
+
+```
+
+In order to try some of the fancier plots we learned in class I opted to make a violin plus jittler plot. This is more informative than the boxplot because it shows more of the distribution and contains the country data points.
+
+I eliminated Oceania as a continent as it had an empty graph (no violin) with 2 datapoints. It looks like Asia has a wide spread of gdpPercap and Europe has a small spread.wh
 
 ```{r}
 
@@ -100,18 +123,6 @@ ggplot(gapminder_2007, aes(x = year, y = gdpPercap, color = continent)) +
   ggtitle("Comparing spread of GDP per capita across continents")
 ```
 
-I tried looking at spread in 2007 using boxplots which is useful for showing more specific information (IQR, range) about the the spread of gdpPercap between each continent.
-
-```{r}
-gapminder_2007 <- gapminder %>%
-  filter(year == 2007)
-ggplot(gapminder_2007, aes(x = continent, y = gdpPercap)) +
-  geom_boxplot() +
-   scale_y_log10() +
-    ggtitle("Comparing GDP per capita across continents using boxplots")
-
-
-```
 
             
 #Task 3
@@ -119,7 +130,7 @@ How is life expectancy changing over time on different continents?
 
 Need to figure out how to find the difference in lifeExp between the latest data point (2007) and first data point (1952). 
 
-After trying several unsuccessful ways of creating a new variable that looks at change in lifeExp, I looked at the participation repo for cm_08.
+After trying several unsuccessful ways of creating a new variable that looks at change in lifeExp, I looked at the participation repo for cm_08. 
 
 ```{r}
 gapminder %>% 
@@ -130,6 +141,7 @@ gapminder %>%
 
 ```
 
+To graph this
 ```{r}
 gapminder %>% 
     group_by(continent, country) %>% 
@@ -147,8 +159,7 @@ ggplot(gapminder, aes(x = year, y = lifeExp, color = continent)) +
   ggtitle("Change in Life Expectancy over 55 years by Continent") 
 ```
 
-I found the above graph too busy and difficult to understand/visualize the continental data. I tried another way of looking at it. I adapted the code from: https://www.mrozinski.com.pl/posts/introduction-to-tidyverse/
-
+I tried another way of looking at it using the median of each continent. The resulting graph is less busy than the one above. I adapted the code from: https://www.mrozinski.com.pl/posts/introduction-to-tidyverse/
 
 
 
